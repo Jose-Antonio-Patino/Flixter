@@ -7,15 +7,16 @@
 //
 
 import UIKit
+import AlamofireImage
 
-class MovieViewController: UIViewController, UITableViewDataSource, UITableViewDelegate{
-    
-    
-    
+class MovieViewController: UIViewController, UITableViewDataSource, UITableViewDelegate
+{
     @IBOutlet weak var tableView: UITableView!
+    
     var movies = [[String:Any]]()
 
-    override func viewDidLoad() {
+    override func viewDidLoad()
+    {
         super.viewDidLoad()
         tableView.dataSource = self
         tableView.delegate = self
@@ -30,6 +31,8 @@ class MovieViewController: UIViewController, UITableViewDataSource, UITableViewD
            } else if let data = data {
               let dataDictionary = try! JSONSerialization.jsonObject(with: data, options: []) as! [String: Any]
             self.movies = dataDictionary["results"] as! [[String:Any]]
+            
+            self.tableView.reloadData()
                 
               print(dataDictionary)
             
@@ -42,25 +45,32 @@ class MovieViewController: UIViewController, UITableViewDataSource, UITableViewD
         task.resume()
     }
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 50
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int
+    {
+        return movies.count
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell()
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
+    {
+        
+        let cell = tableView.dequeueReusableCell(withIdentifier: "MovieCell") as! MovieCell
+        
         let movie = movies[indexPath.row]
         let title = movie["title"] as! String
-        cell.textLabel!.text = title
+        
+        let synopsis = movie["overview"] as! String
+        
+        cell.titleLabel.text = title
+        cell.synopsisLabel.text = synopsis
+        
+        let baseUrl = "https://image.tmdb.org/t/p/w185"
+        let posterPath = movie["poster_path"] as! String
+        let posterUrl = URL(string: baseUrl + posterPath)!
+        
+        cell.posterView.af_setImage(withURL: posterUrl)
+
+        
         return cell
     }
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
 
 }
